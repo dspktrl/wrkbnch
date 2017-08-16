@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  ls_tcp_redis:
+    image: logstash:5
+    container_name: ls_tcp_redis
+    volumes:
+      - ./logstash:/config-dir
+    ports:
+      - "20999:20999"
+    command: logstash -f /config-dir/tcp_redis.conf
+    depends_on:
+      - redis
+    networks:
+      - app_net
+
+  redis:
+    image: redis
+    container_name: redis
+    volumes:
+      - ./redis/data:/data
+      - ./redis/redis.conf:/etc/redis/redis.conf
+      #- ./redis/redis.conf:
+    command: ["redis-server", "/etc/redis/redis.conf"]
+    expose:
+      - "6379"
+    # ports:
+      # - "6379:6379"
+    networks:
+      - app_net
+    # depends_on:
+      # - python server
+      # - ls_redis_es
+
+  scipy:
+    image: custom-scipy
+    container_name: scipy
+    volumes:
+      - ./python/scripts:/home/jovyan
+    ports:
+      - 8888:8888
+    networks:
+      - app_net
+
+
+
+networks:
+  app_net:
